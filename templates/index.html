@@ -1,0 +1,172 @@
+<!DOCTYPE HTML>
+<!--
+	Theory by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+	<head>
+		<title>Theory by TEMPLATED</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="static/css/main.css" />
+	</head>
+	<body>
+
+		<!-- Banner -->
+			<section id="banner">
+				<h1>Welcome to AI Poincare</h1>
+				<p>Discovering conservation laws with machine learning.</p>
+			</section>
+
+		<!-- One -->
+			<section id="one" class="wrapper" style="padding: 20px 0px 0px 0px">
+				<div class="inner">
+					<h2 style="color:black;">Step 1: Select a dataset.</h2>
+					<div class="flex flex-2">
+						<article>
+							<header>
+								<h3>Choose from our dataset library</h3>
+							</header>
+						<form action="/" method="POST">
+						  <select name="HS" selected={{session.model}}>
+						  	<option value="oned_harmonic">Harmonic Oscillator (1D)</option>
+						  	<option value="twod_kepler">Kepler (2D)</option>
+						  	<option value="double_pendulum">Double Pendulum (2D)</option>
+						  	<option value="magnetic_mirror">Magnetic Mirror (2D)</option>
+						  	<option value="three_body">Three Body (2D)</option>
+						  </select><br>
+						  <input type="submit" value="Submit">
+						</form>
+
+							
+						</article>
+						<article>
+							<header>
+								<h3>Upload your own favorite dataset</h3>
+							</header>
+							<form action="/upload" method="POST" enctype = "multipart/form-data">
+							  <input type="file" style="font-size:12pt;height:35px;width:400px;" id="myFile" name="filename"><br><br>
+							  <input type="submit">
+							</form>
+						</article>
+					</div>
+				{% if session.model %}
+				<h3>You are using the dataset:{{session.model}}.</h3>
+				{% else %}
+				<h3>You have not chosen any dataset.</h3>
+				{% endif %}
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="wrapper" style="padding: 20px 0px 0px 0px">
+				<div class="inner">
+					<h2 style="color:black;">Step 2 (Optional): Customize your parameters.</h2>
+					<div class="flex flex-1">
+							<form action="/preference" method="POST">
+							<h3>Preprocessing</h3><br>
+								Remove insignificant PCA components?
+								  {% if session.prepca == "yes" %}
+								  <select name="prepca">
+								  	<option value="Yes" selected>Yes</option>
+								  	<option value="No">No</option>
+								  </select><br><br>
+								  {% else %}
+								  <select name="prepca">
+								  	<option value="Yes">Yes</option>
+								  	<option value="No" selected>No</option>
+								  </select>
+								  {% endif %}
+
+								Noise Threshold&nbsp&nbsp&nbsp
+								  <input type="text" name="noise_threshold" value={{session.noise_threshold}}>
+			
+							<h3>Training Neural Network</h3>
+								Hidden widths &nbsp&nbsp&nbsp
+							  <input type="text" name="hidden_widths" value={{session.hidden_widths}}><br><br>
+							  LeakyRelu slope &nbsp&nbsp&nbsp
+							  <input type="text" name="slope" value={{session.slope}}><br><br>
+							  L (length scale) &nbsp&nbsp&nbsp
+							  <input type="text" name="L" value={{session.L}}><br><br>
+							  Optimizer &nbsp&nbsp&nbsp
+							  {% if session.opt == "Adam" %}
+							  <select name="opt">
+							  	<option value="Adam" selected>Adam</option>
+							  	<option value="SGD">SGD</option>
+							  </select><br><br>
+							  {% else %}
+							  <select name="opt">
+							  	<option value="Adam">Adam</option>
+							  	<option value="SGD" selected>SGD</option>
+							  </select><br><br>
+							  {% endif %}
+
+							  Learning Rate &nbsp&nbsp&nbsp
+							  <input type="text" name="learning_rate" value={{session.learning_rate}}><br><br>
+							  Batch Size &nbsp&nbsp&nbsp
+							  <input type="text" name="batch_size" value={{session.batch_size}}><br><br>
+							  Training Iterations &nbsp&nbsp&nbsp
+							  <input type="text" name="training_iteration" value={{session.training_iteration}}><br>
+	
+							<h3>Measuring Neff</h3>
+								a &nbsp&nbsp&nbsp
+							  <input type="text" name="a" value={{session.a}}><br><br>
+							  n_walk &nbsp&nbsp&nbsp
+							  <input type="text" name="n_walk" value={{session.n_walk}}><br><br>
+							  <input type="submit" name="submit" value="Save">
+							  <input type="submit" name="submit" value="Reset">
+							</form>
+					</div>
+				{% if save %}
+				<p>You have successfully saved your preferences.</p>
+				{% else %}
+				<p>You are using default parameters.</p>
+				{% endif %}
+				</div>
+			</section>
+
+		<!-- Three -->
+			<section id="three" class="wrapper">
+				<div class="inner">
+					<h2 style="color:black;">Step 3: Training neural network and get the conclusion!</h2>
+					<form action="/train" method="post">
+					    <button name="train" type="submit">Train</button>
+					</form><br>
+					{% if update %}
+					<p>Number of conserved quantities: {{neff}}.</p> 
+					<p>Confidence Level: {{confidence}}.</p>
+					<p>For more details, please see the two figures we created for you: (1)Explained Ratio Diagram at "./static/images/ERD.png" (2) Neff histogram at "./static/images/Neff.png."</p>
+					{% else %}
+					<p>Neff is ???.</p> 
+					<p>Confidence Level is ???.</p>
+					{% endif %}
+				</div>
+			</section>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<div class="flex">
+						<div class="copyright">
+							&copy; Untitled. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com">Unsplash</a>.
+						</div>
+						<ul class="icons">
+							<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon fa-linkedin"><span class="label">linkedIn</span></a></li>
+							<li><a href="#" class="icon fa-pinterest-p"><span class="label">Pinterest</span></a></li>
+							<li><a href="#" class="icon fa-vimeo"><span class="label">Vimeo</span></a></li>
+						</ul>
+					</div>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="static/js/jquery.min.js"></script>
+			<script src="static/js/skel.min.js"></script>
+			<script src="static/js/util.js"></script>
+			<script src="static/js/main.js"></script>
+
+	</body>
+</html>

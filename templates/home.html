@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script>
+function refreshImage(imgElement, imgURL){    
+    // create a new timestamp 
+    var timestamp = new Date().getTime();  
+    var el = document.getElementById(imgElement);  
+    var queryString = "?t=" + timestamp;    
+    el.src = imgURL + queryString;    
+}    
+</script>
+<style>
+.demo div {
+    float: left;
+    clear: none; 
+}
+</style>
+</head>
+
+<body>
+<h2>AI Poincare</h2>
+<h3>STEP ONE: Select a dataset!</h3>
+
+<form action="/" method="POST">
+  You could either (1) Choose from our library
+  <select name="HS" selected={{session.model}}>
+  	<option value="oned_harmonic">Harmonic Oscillator (1D)</option>
+  	<option value="twod_kepler">Kepler (2D)</option>
+  	<option value="double_pendulum">Double Pendulum (2D)</option>
+  	<option value="magnetic_mirror">Magnetic Mirror (2D)</option>
+  	<option value="three_body">Three Body (2D)</option>
+  </select> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+  <input type="submit" value="Submit">
+</form>
+
+<form action="/upload" method="POST" enctype = "multipart/form-data">
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp or
+ (2) Upload your favorite txt file:
+  <input type="file" id="myFile" name="filename">
+  <input type="submit">
+</form>
+{% if session.model %}
+<p>You are using the dataset:{{session.model}}.</p>
+{% else %}
+<p>You have not chosen any dataset.</p>
+{% endif %}
+
+
+<h3>STEP TWO (Optional): Feel free to play with hyperparameters of AI Poincare!</h3>
+
+<div class="expandContent">
+        <a href="#">Click to Expand</a>
+</div>
+<div class="showMe" style="display:none">
+<form action="/preference" method="POST">
+A. Preprocessing:
+  (1) Remove insignificant PCA components?
+  {% if session.prepca == "yes" %}
+  <input type="radio" name="prepca" value="yes" checked="checked">
+  <label>Yes</label>
+  <input type="radio" name="prepca" value="no">
+  <label>No</label>
+  {% else %}
+  <input type="radio" name="prepca" value="yes">
+  <label>Yes</label>
+  <input type="radio" name="prepca" value="no"  checked="checked">
+  <label>No</label>
+  {% endif %} 
+  &nbsp&nbsp&nbsp (2) Noise Threshold&nbsp&nbsp&nbsp
+  <input type="text" name="noise_threshold" value={{session.noise_threshold}}><br><br>
+
+B. Fully-Connected Neural Network:
+  (1) Hidden widths 
+  <input type="text" name="hidden_widths" value={{session.hidden_widths}}> &nbsp&nbsp&nbsp
+  (2) LeakyRelu slope
+  <input type="text" name="slope" value={{session.slope}}> &nbsp&nbsp&nbsp
+  (3) L (length scale) &nbsp&nbsp&nbsp
+  <input type="text" name="L" value={{session.L}}> <br><br>
+  &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (4) Optimizer 
+  {% if session.opt == "Adam" %}
+  <select name="opt">
+  	<option value="Adam" selected>Adam</option>
+  	<option value="SGD">SGD</option>
+  </select>
+  {% else %}
+  <select name="opt">
+  	<option value="Adam">Adam</option>
+  	<option value="SGD" selected>SGD</option>
+  </select>
+  {% endif %} &nbsp&nbsp&nbsp
+  (5) Learning Rate
+  <input type="text" name="learning_rate" value={{session.learning_rate}}>&nbsp&nbsp&nbsp
+  (6) Batch Size
+  <input type="text" name="batch_size" value={{session.batch_size}}>&nbsp&nbsp&nbsp
+  (7) Training Iterations
+  <input type="text" name="training_iteration" value={{session.training_iteration}}><br><br>
+
+C. Measuring Neff:
+  (1) a 
+  <input type="text" name="a" value={{session.a}}>&nbsp&nbsp&nbsp
+  (2) n_walk &nbsp&nbsp&nbsp
+  <input type="text" name="n_walk" value={{session.n_walk}}>&nbsp&nbsp&nbsp <br><br>
+  <input type="submit" name="submit" value="Save">
+  <input type="submit" name="submit" value="Reset">
+  {% if save %}
+	<p>You have successfully saved your preferences.</p>
+	{% else %}
+	<p>You are using default parameters.</p>
+	{% endif %}
+</form>
+</div>
+
+<h3>STEP THREE: Training the neural network and make a conclusion!</h3>
+
+<form action="/train" method="post">
+    <button name="train" type="submit">Train</button>
+    {% if update %}
+	<p>Number of conserved quantities: {{neff}} (Linear: {{remove_dim}}). Confidence Level: {{confidence}}. </p>
+	<p>The left is Explained Ratio Diagram, and the right is Neff histogram.</p>
+	{% else %}
+	<p>Neff is ???. Confidence Level is ???.</p>
+	<p>The left is Poincare, and the right is his map.</p>
+	{% endif %}
+</form>
+
+<div class="demo">
+    <div>
+    	{% if update %}
+		<img id='ERD' src="{{url_for('static',filename='images/ERD.png')}}" width="250" height="150">
+		<script type="text/javascript">
+		refreshImage("ERD","{{url_for('static',filename='images/ERD.png')}}")</script>
+		{% else %}
+		<img id='loading' src="{{ url_for('static',filename='images/poincare.jfif')}}" width="250" height="150">
+		{% endif %}<br>    
+    </div>
+    <div>
+        {% if update %}
+		<img id='Neff' src="{{url_for('static',filename='images/Neff.png')}}" width="250" height="150">
+		<script type="text/javascript">
+		refreshImage("Neff","{{url_for('static',filename='images/Neff.png')}}")</script>
+		{% else %}
+		<img id='loading2' src="{{url_for('static',filename='images/Poincare_map.png')}}" width="250" height="150">
+		{% endif %}<br>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>  
+    $('.expandContent').click(function(){
+        $('.showMe').toggle();
+    });
+</script>
+</body>
+
+</html>
